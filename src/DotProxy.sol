@@ -5,8 +5,8 @@ pragma solidity 0.8.13;
  * @dev This is the creation code opcode breakdown:
  * 61 eeee:	  	push2 size (which is runtime code size + immutables length)			eeee
  * 80:			dup1																eeee, eeee
- * 60 0a: 		push1 offset (in this case, 10, this is the creation code size)		0b, eeee, eeee
- * 3d:			returndatasize														0, 0b, eeee, eeee
+ * 60 0a: 		push1 offset (in this case, 10, this is the creation code size)		0a, eeee, eeee
+ * 3d:			returndatasize														0, 0a, eeee, eeee
  * 39:			codecopy (stack input: memory loc, offset, size)					eeee
  * 3d:			returndatasize														0, eeee
  * f3:			return (stack input: memory offset, size)							
