@@ -10,7 +10,9 @@ contract DotProxyTest is Test {
 	DotProxy dotProxy;
 	DotImpl dotImpl;
 
-	address testAddr = address(1);
+    uint256 constant MAX_CODE_SIZE = 24576;
+	uint256 constant MAX_IMMUTABLE_COUNT = uint256(24576 - 45) / 32;
+	address constant TEST_ADDR = address(1);
 
 	function setUp() public {
 		dotImpl = new DotImpl();
@@ -18,23 +20,32 @@ contract DotProxyTest is Test {
 	}
 
 	function testProperImmutables() public {
-		// uint256 maxImmutables = uint256(24576 - 45) / 32;
-		// vm.assume(immutableCount == maxImmutables);
-		uint256 immutableCount = uint256(24576 - 45) / 32 + 10;
-		bytes32[] memory addrs = new bytes32[](immutableCount);
-		for (uint256 i = 0; i < immutableCount; ) {
-			addrs[i] = bytes32(uint256(uint160(testAddr)));
+		bytes32[] memory addrs = new bytes32[](MAX_IMMUTABLE_COUNT);
+		for (uint256 i = 0; i < MAX_IMMUTABLE_COUNT; ) {
+			addrs[i] = bytes32(uint256(uint160(TEST_ADDR)));
 			unchecked {
 				++i;
 			}
 		}
 		DotImpl clone = DotImpl(dotProxy.dotClone(address(dotImpl), addrs));
 		console2.log(address(clone).code.length);
-		for (uint256 i = 0; i < immutableCount; ) {
-			assertEq(clone.getImmutAtAsAddr(i), testAddr);
+		for (uint256 i = 0; i < MAX_IMMUTABLE_COUNT; ) {
+			assertEq(clone.getImmutAtAsAddr(i), TEST_ADDR);
 			unchecked {
 				++i;
 			}
 		}
 	}
+
+	function testBeyondMaxImmutablesSize() public {
+        bytes32[] memory addrs = new bytes32[](MAX_IMMUTABLE_COUNT + 1);
+		for (uint256 i = 0; i < MAX_IMMUTABLE_COUNT; ) {
+			addrs[i] = bytes32(uint256(uint160(TEST_ADDR)));
+			unchecked {
+				++i;
+			}
+		}
+        address clone = dotProxy.dotClone(TEST_ADDR, addrs);
+        assertTrue(clone.code.length > 24576);
+    }
 }
